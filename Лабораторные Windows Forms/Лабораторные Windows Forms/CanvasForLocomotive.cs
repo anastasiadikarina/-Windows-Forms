@@ -25,19 +25,21 @@ namespace Лабораторные_Windows_Forms
             _drawing = locomotive;
             return true;
         }
-
         public void SetPosition(int x, int y)
         {
-            if (_drawing == null) return;
+            if (_drawing == null || !_canvasWidth.HasValue || !_canvasHeight.HasValue) return;
 
             int newX = x;
             int newY = y;
 
             if (newX < 0) newX = 0;
+
             if (newY < 0) newY = 0;
-            if (_canvasWidth.HasValue && newX + _drawing.Width > _canvasWidth.Value)
+
+            if (newX + _drawing.Width > _canvasWidth.Value)
                 newX = _canvasWidth.Value - _drawing.Width;
-            if (_canvasHeight.HasValue && newY + _drawing.Height > _canvasHeight.Value)
+
+            if (newY + _drawing.Height > _canvasHeight.Value)
                 newY = _canvasHeight.Value - _drawing.Height;
 
             _drawing.SetPosition(newX, newY);
@@ -45,18 +47,46 @@ namespace Лабораторные_Windows_Forms
 
         public bool Move(DirectionType direction)
         {
-            if (_drawing == null || !_drawing.PosX.HasValue || !_drawing.PosY.HasValue)
+            if (_drawing == null || !_drawing.PosX.HasValue || !_drawing.PosY.HasValue || !_drawing.Step.HasValue)
                 return false;
 
+            int step = (int)_drawing.Step.Value;
+            if (step < 1) step = 5; 
+
+            int newX = _drawing.PosX.Value;
+            int newY = _drawing.PosY.Value;
+
+            
+            switch (direction)
+            {
+                case DirectionType.Left: newX -= step; break;
+                case DirectionType.Right: newX += step; break;
+                case DirectionType.Up: newY -= step; break;
+                case DirectionType.Down: newY += step; break;
+                default: return false;
+            }
+
+            
+            if (newX < 0) return false;
+
+            if (newY < 0) return false;
+
+            
+            if (_canvasWidth.HasValue && newX + _drawing.Width > _canvasWidth.Value)
+                return false;
+
+            
+            if (_canvasHeight.HasValue && newY + _drawing.Height > _canvasHeight.Value)
+                return false;
+
+            
             switch (direction)
             {
                 case DirectionType.Left: _drawing.MoveLeft(); break;
                 case DirectionType.Right: _drawing.MoveRight(); break;
                 case DirectionType.Up: _drawing.MoveUp(); break;
                 case DirectionType.Down: _drawing.MoveDown(); break;
-                default: return false;
             }
-
             return true;
         }
 
@@ -71,5 +101,7 @@ namespace Лабораторные_Windows_Forms
             _drawing?.Draw(g);
             return bmp;
         }
+
+        public DrawingLocomotive? DrawingLocomotive => _drawing;
     }
 }
