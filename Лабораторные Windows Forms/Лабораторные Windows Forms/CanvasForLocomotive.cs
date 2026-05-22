@@ -20,11 +20,12 @@ namespace Лабораторные_Windows_Forms
         public bool Insert(DrawingLocomotive locomotive)
         {
             if (!_canvasWidth.HasValue || !_canvasHeight.HasValue) return false;
-            if (locomotive.Width > _canvasWidth.Value || locomotive.Height > _canvasHeight.Value) return false;
+            if (locomotive.RealWidth > _canvasWidth.Value || locomotive.RealHeight > _canvasHeight.Value) return false;
 
             _drawing = locomotive;
             return true;
         }
+
         public void SetPosition(int x, int y)
         {
             if (_drawing == null || !_canvasWidth.HasValue || !_canvasHeight.HasValue) return;
@@ -32,15 +33,17 @@ namespace Лабораторные_Windows_Forms
             int newX = x;
             int newY = y;
 
-            if (newX < 0) newX = 0;
+            if (newX + _drawing.RealOffsetX < 0)
+                newX = -_drawing.RealOffsetX;
 
-            if (newY < 0) newY = 0;
+            if (newY + _drawing.RealOffsetY < 0)
+                newY = -_drawing.RealOffsetY;
 
-            if (newX + _drawing.Width > _canvasWidth.Value)
-                newX = _canvasWidth.Value - _drawing.Width;
+            if (newX + _drawing.RealOffsetX + _drawing.RealWidth > _canvasWidth.Value)
+                newX = _canvasWidth.Value - _drawing.RealWidth - _drawing.RealOffsetX;
 
-            if (newY + _drawing.Height > _canvasHeight.Value)
-                newY = _canvasHeight.Value - _drawing.Height;
+            if (newY + _drawing.RealOffsetY + _drawing.RealHeight > _canvasHeight.Value)
+                newY = _canvasHeight.Value - _drawing.RealHeight - _drawing.RealOffsetY;
 
             _drawing.SetPosition(newX, newY);
         }
@@ -51,12 +54,11 @@ namespace Лабораторные_Windows_Forms
                 return false;
 
             int step = (int)_drawing.Step.Value;
-            if (step < 1) step = 5; 
+            if (step < 1) step = 5;
 
             int newX = _drawing.PosX.Value;
             int newY = _drawing.PosY.Value;
 
-            
             switch (direction)
             {
                 case DirectionType.Left: newX -= step; break;
@@ -66,20 +68,16 @@ namespace Лабораторные_Windows_Forms
                 default: return false;
             }
 
-            
-            if (newX < 0) return false;
+            int leftEdge = newX + _drawing.RealOffsetX;
+            int rightEdge = newX + _drawing.RealOffsetX + _drawing.RealWidth;
+            int topEdge = newY + _drawing.RealOffsetY;
+            int bottomEdge = newY + _drawing.RealOffsetY + _drawing.RealHeight;
 
-            if (newY < 0) return false;
+            if (leftEdge < 0) return false;
+            if (topEdge < 0) return false;
+            if (rightEdge > _canvasWidth.Value) return false;
+            if (bottomEdge > _canvasHeight.Value) return false;
 
-            
-            if (_canvasWidth.HasValue && newX + _drawing.Width > _canvasWidth.Value)
-                return false;
-
-            
-            if (_canvasHeight.HasValue && newY + _drawing.Height > _canvasHeight.Value)
-                return false;
-
-            
             switch (direction)
             {
                 case DirectionType.Left: _drawing.MoveLeft(); break;

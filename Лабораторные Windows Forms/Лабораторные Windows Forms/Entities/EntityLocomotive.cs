@@ -4,14 +4,15 @@ namespace Лабораторные_Windows_Forms.Entities
 {
     public class EntityLocomotive
     {
-        public int Speed { get; private set; }
-        public double Weight { get; private set; }
-        public Color BodyColor { get; private set; }
-        public int WheelsPerTruck { get; private set; }
+        public int Speed { get; init; }
+        public double Weight { get; init; }
+        public Color BodyColor { get; init; }
+        public int WheelsPerTruck { get; init; }
 
-        public double Step => Speed * 5 + 5;
+        public double Step => Speed * 100 / Weight;
 
-        public void Init(int speed, double weight, Color bodyColor, int wheelsPerTruck)
+        // Конструктор вместо Init
+        public EntityLocomotive(int speed, double weight, Color bodyColor, int wheelsPerTruck)
         {
             Speed = speed;
             Weight = weight;
